@@ -5,35 +5,33 @@ import { isValidObjectId } from '../utils/validators'
 class AppointmentController {
   async create(req: Request, res: Response): Promise<Response> {
     try {
-      const { clientName, email, date, time, serviceId, providerId } = req.body
+      const { date, time, serviceId, providerId } = req.body
 
-      if (
-        !clientName ||
-        !email ||
-        !date ||
-        !time ||
-        !serviceId ||
-        !providerId
-      ) {
+      const clientId = req.user?.id
+
+      if (!clientId || !date || !time || !serviceId || !providerId) {
         return res.status(400).json({
           message:
-            'All fields are required: clientName, email, date, time, serviceId, providerId',
+            'All fields are required: clientId, date, time, serviceId, providerId',
         })
       }
 
-      if (!isValidObjectId(serviceId) || !isValidObjectId(providerId)) {
+      if (
+        !isValidObjectId(serviceId) ||
+        !isValidObjectId(providerId) ||
+        !isValidObjectId(clientId)
+      ) {
         return res
           .status(400)
           .json({ message: 'Invalid serviceId or providerId' })
       }
 
       const appointment = await appointmentService.createAppointment({
-        clientName,
-        email,
         date,
         time,
         serviceId,
         providerId,
+        clientId,
       })
 
       return res.status(201).json(appointment)
