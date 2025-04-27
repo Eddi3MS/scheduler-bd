@@ -22,9 +22,9 @@ class AuthService {
     await user.save()
 
     const token = this.generateToken(user)
-    const { password: _, ...userData } = user.toObject()
+    const { password: _, _id, ...userData } = user.toObject()
 
-    return { user: userData as any, token }
+    return { user: { ...userData, id: _id } as any, token }
   }
 
   async login(email: string, password: string): Promise<LoginResult> {
@@ -36,9 +36,9 @@ class AuthService {
 
     const token = this.generateToken(user)
 
-    const { password: _, ...userData } = user.toObject()
+    const { password: _, _id, ...userData } = user.toObject()
 
-    return { user: userData as any, token }
+    return { user: { ...userData, id: _id } as any, token }
   }
 
   async getUserById(id: string): Promise<Omit<IUser, 'password'>> {
@@ -86,7 +86,7 @@ class AuthService {
 
   private generateToken(user: IUser): string {
     return jwt.sign(
-      { id: user._id, email: user.email, role: user.role },
+      { id: user._id, email: user.email, role: user.role, name: user.name },
       JWT_SECRET,
       { expiresIn: '7d' }
     )
