@@ -102,7 +102,7 @@ class AppointmentService {
 
   async listAppointments(): Promise<IAppointment[]> {
     return await Appointment.find({ canceled: false }).populate(
-      'serviceId providerId'
+      'serviceId providerId clientId'
     )
   }
 
@@ -111,18 +111,14 @@ class AppointmentService {
     return await Appointment.find({
       date: { $gte: today },
       canceled: false,
-    }).populate('serviceId providerId')
+    }).populate('serviceId providerId clientId')
   }
 
-  async listOwnAppointments(userEmail: string): Promise<IAppointment[]> {
+  async listOwnAppointments(clientId: string): Promise<IAppointment[]> {
     return await Appointment.find({
-      email: userEmail,
+      clientId,
       canceled: false,
     }).populate('serviceId providerId')
-  }
-
-  async listAppointmentsByMail(email: string): Promise<IAppointment[]> {
-    return await Appointment.find({ email }).populate('serviceId providerId')
   }
 
   async getAvailableTimes(

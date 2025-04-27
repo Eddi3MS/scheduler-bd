@@ -21,13 +21,6 @@ router.get(
   AppointmentController.listFuture
 )
 
-router.get(
-  '/by-email/:email',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  AppointmentController.listByMail
-)
-
 router.get('/me', authMiddleware, AppointmentController.listOwn)
 
 router.get(

@@ -42,9 +42,11 @@ class AppointmentController {
 
   async listOwn(req: Request, res: Response) {
     try {
-      const appointments = await appointmentService.listOwnAppointments(
-        req.user!.email
-      )
+      const userId = req.user?.id
+      if (!userId || !isValidObjectId(userId)) {
+        return res.status(400).json({ message: 'Invalid userId' })
+      }
+      const appointments = await appointmentService.listOwnAppointments(userId)
       res.json(appointments)
     } catch (error: any) {
       res.status(500).json({ error: error.message })
@@ -68,20 +70,6 @@ class AppointmentController {
       return res
         .status(500)
         .json({ message: 'Failed to fetch future appointments' })
-    }
-  }
-
-  async listByMail(req: Request, res: Response): Promise<Response> {
-    try {
-      const { email } = req.params
-      const appointments = await appointmentService.listAppointmentsByMail(
-        email
-      )
-      return res.json(appointments)
-    } catch (error: any) {
-      return res
-        .status(500)
-        .json({ message: 'Failed to fetch appointments by email' })
     }
   }
 
