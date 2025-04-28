@@ -11,8 +11,8 @@ class ServiceService {
     return await Service.find()
   }
 
-  async getServiceById(id: string): Promise<IService[]> {
-    return await Service.find({ _id: id })
+  async getServiceById(id: string): Promise<IService | null> {
+    return await Service.findById(id)
   }
 
   async listServicesByProvider(providerId: string): Promise<IService[]> {

@@ -12,7 +12,7 @@ class ProviderService {
     return await Provider.find()
   }
 
-  async getProviderById(id: string): Promise<IProvider[] | null> {
+  async getProviderById(id: string): Promise<IProvider | null> {
     return await Provider.findById(id)
   }
 
