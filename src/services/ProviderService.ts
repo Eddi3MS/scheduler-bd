@@ -12,6 +12,10 @@ class ProviderService {
     return await Provider.find()
   }
 
+  async getProviderById(id: string): Promise<IProvider[] | null> {
+    return await Provider.findById(id)
+  }
+
   async updateProvider(
     id: string,
     providerData: Partial<ICreateProvider>

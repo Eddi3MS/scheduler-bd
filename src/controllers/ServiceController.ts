@@ -25,11 +25,26 @@ class ServiceController {
   }
 
   async list(req: Request, res: Response): Promise<Response> {
-    const { providerId } = req.body
-    if (!isValidObjectId(providerId)) {
+    const services = await serviceService.listServices()
+    return res.json(services)
+  }
+
+  async getById(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params
+    if (!isValidObjectId(id)) {
+      return res.status(400).json({ message: 'ServiceId is required' })
+    }
+
+    const services = await serviceService.getServiceById(id)
+    return res.json(services)
+  }
+
+  async listByProviderId(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params
+    if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'ProviderId is required' })
     }
-    const services = await serviceService.listServices(providerId)
+    const services = await serviceService.listServicesByProvider(id)
     return res.json(services)
   }
 

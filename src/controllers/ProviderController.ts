@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import providerService from '../services/ProviderService'
-import { isValidTime } from '../utils/validators'
+import { isValidObjectId, isValidTime } from '../utils/validators'
 
 class ProviderController {
   async create(req: Request, res: Response): Promise<Response> {
@@ -33,8 +33,26 @@ class ProviderController {
   }
 
   async list(req: Request, res: Response): Promise<Response> {
-    const providers = await providerService.listProviders()
-    return res.json(providers)
+    try {
+      const providers = await providerService.listProviders()
+      return res.json(providers)
+    } catch (error) {
+      return res.status(500).json({ message: 'Error listing providers' })
+    }
+  }
+
+  async getById(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params
+    if (!isValidObjectId(id)) {
+      return res.status(500).json({ message: 'Invalid parameters' })
+    }
+
+    try {
+      const provider = await providerService.getProviderById(id)
+      return res.json(provider)
+    } catch (error) {
+      return res.status(500).json({ message: 'Error listing provider' })
+    }
   }
 
   async update(req: Request, res: Response): Promise<Response> {
@@ -72,8 +90,12 @@ class ProviderController {
 
   async delete(req: Request, res: Response): Promise<Response> {
     const { id } = req.params
-    await providerService.deleteProvider(id)
-    return res.sendStatus(204)
+    try {
+      await providerService.deleteProvider(id)
+      return res.sendStatus(204)
+    } catch (error) {
+      return res.status(500).json({ message: 'Error deleting provider' })
+    }
   }
 }
 

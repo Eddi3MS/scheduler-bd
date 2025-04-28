@@ -7,7 +7,15 @@ class ServiceService {
     return await service.save()
   }
 
-  async listServices(providerId: string): Promise<IService[]> {
+  async listServices(): Promise<IService[]> {
+    return await Service.find()
+  }
+
+  async getServiceById(id: string): Promise<IService[]> {
+    return await Service.find({ _id: id })
+  }
+
+  async listServicesByProvider(providerId: string): Promise<IService[]> {
     return await Service.find({
       providerId,
     })

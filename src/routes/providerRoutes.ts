@@ -14,6 +14,7 @@ router.post(
 
 router.get('/', authMiddleware, ProviderController.list)
 
+router.get('/:id', authMiddleware, ProviderController.getById)
 router.put(
   '/:id',
   authMiddleware,

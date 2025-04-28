@@ -13,6 +13,13 @@ router.post(
 )
 
 router.get('/', authMiddleware, ServiceController.list)
+router.get('/:id', authMiddleware, ServiceController.getById)
+
+router.get(
+  '/by-provider/:id',
+  authMiddleware,
+  ServiceController.listByProviderId
+)
 
 router.put(
   '/:id',
