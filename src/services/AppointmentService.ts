@@ -1,7 +1,7 @@
 import { IAppointment, ICreateAppointment } from '../interfaces/IAppointment'
 import Appointment from '../models/Appointment'
 import Break from '../models/Break'
-import ClosedDay from '../models/ClosedDay'
+import ClosedDates from '../models/ClosedDates'
 import Provider from '../models/Provider'
 import Service from '../models/Service'
 import WeeklyClosedDay from '../models/WeeklyClosedDay'
@@ -39,7 +39,7 @@ class AppointmentService {
     }
 
     // Check specific closed days (e.g., holidays)
-    const closedDay = await ClosedDay.findOne({ date })
+    const closedDay = await ClosedDates.findOne({ date })
     if (closedDay) {
       throw new Error('providershop is closed on this day')
     }
@@ -129,7 +129,7 @@ class AppointmentService {
     // Verifica se o dia é fechado
     const dayOfWeek = getDayOfWeek(date)
     const isWeeklyClosed = await WeeklyClosedDay.findOne({ dayOfWeek })
-    const isClosedDay = await ClosedDay.findOne({ date })
+    const isClosedDay = await ClosedDates.findOne({ date })
     if (isWeeklyClosed || isClosedDay) return []
 
     const service = await Service.findById(serviceId)
@@ -141,8 +141,7 @@ class AppointmentService {
     const provider = await Provider.findById(providerId)
     if (!provider) throw new Error('provider not found')
 
-    const workingHours = provider.workingHours // horas de trabalho do barbeiro
-    console.log('🚀 ~ AppointmentService ~ workingHours:', workingHours)
+    const workingHours = provider.workingHours
 
     const breaks = await Break.find({ providerId, date })
     const appointments = await Appointment.find({ providerId, date }).populate(
@@ -154,7 +153,6 @@ class AppointmentService {
     for (const period of workingHours) {
       let current = parseDateTime(date, period.start)
 
-      console.log('🚀 ~ AppointmentService ~ end:', date, period.end)
       const end = parseDateTime(date, period.end)
 
       while (addMinutes(current, duration).isSameOrBefore(end)) {

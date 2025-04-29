@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import ClosedDayController from '../controllers/ClosedDayController'
+import ClosedDatesController from '../controllers/ClosedDatesController'
 import { authMiddleware } from '../middlewares/authMiddleware'
 import { roleMiddleware } from '../middlewares/roleMiddleware'
 
@@ -9,16 +9,9 @@ router.post(
   '/',
   authMiddleware,
   roleMiddleware(['admin']),
-  ClosedDayController.create
+  ClosedDatesController.updateClosedDates
 )
 
-router.get('/', authMiddleware, ClosedDayController.list)
-
-router.delete(
-  '/:id',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ClosedDayController.delete
-)
+router.get('/', authMiddleware, ClosedDatesController.list)
 
 export default router
