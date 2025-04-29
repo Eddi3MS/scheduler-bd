@@ -41,7 +41,7 @@ class AppointmentService {
     // Check specific closed days (e.g., holidays)
     const closedDay = await ClosedDates.findOne({ date })
     if (closedDay) {
-      throw new Error('providershop is closed on this day')
+      throw new Error('Provider is closed on this day')
     }
 
     const service = await Service.findById(serviceId)

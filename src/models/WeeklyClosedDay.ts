@@ -2,7 +2,7 @@ import mongoose, { Schema } from 'mongoose'
 import { IWeeklyClosedDay } from '../interfaces/IWeeklyClosedDay'
 
 const WeeklyClosedDaySchema: Schema = new Schema({
-  diaSemana: { type: Number, required: true, min: 0, max: 6 },
+  day: { type: Number, required: true, min: 0, max: 6 },
 })
 
 export default mongoose.models.WeeklyClosedDaySchema ||

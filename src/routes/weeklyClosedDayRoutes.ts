@@ -9,16 +9,9 @@ router.post(
   '/',
   authMiddleware,
   roleMiddleware(['admin']),
-  WeeklyClosedDayController.create
+  WeeklyClosedDayController.updateClosedDays
 )
 
 router.get('/', authMiddleware, WeeklyClosedDayController.list)
-
-router.delete(
-  '/:id',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  WeeklyClosedDayController.delete
-)
 
 export default router

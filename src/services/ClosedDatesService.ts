@@ -11,7 +11,11 @@ class ClosedDatesService {
   }
 
   async listClosedDates(): Promise<IClosedDates[]> {
-    return await ClosedDates.find()
+    const today = new Date().toISOString().split('T')[0]
+
+    return await ClosedDates.find({
+      date: { $gte: today },
+    })
   }
 }
 

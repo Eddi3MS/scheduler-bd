@@ -1,9 +1,9 @@
 import { Document } from 'mongoose'
 
 export interface IWeeklyClosedDay extends Document {
-  dayOfWeek: number
+  day: number
 }
 
 export interface ICreateWeeklyClosedDay {
-  dayOfWeek: number
+  day: number
 }
