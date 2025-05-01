@@ -75,7 +75,9 @@ class AppointmentController {
 
   async getAvailableTime(req: Request, res: Response): Promise<Response> {
     try {
-      const { serviceId, providerId, date } = req.body
+      const serviceId = req.query.serviceId as string
+      const providerId = req.query.providerId as string
+      const date = req.query.date as string
 
       if (
         !isValidObjectId(serviceId) ||
