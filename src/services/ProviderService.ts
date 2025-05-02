@@ -1,31 +1,39 @@
+import { ICreateProvider, IProvider } from '../interfaces/IProvider'
 import Provider from '../models/Provider'
-import { IProvider, ICreateProvider } from '../interfaces/IProvider'
-import { isValidObjectId } from '../utils/validators'
 
 class ProviderService {
-  async createProvider(providerData: ICreateProvider): Promise<IProvider> {
-    const provider = new Provider(providerData)
-    return await provider.save()
+  async createOrUpdateProvider({
+    userId,
+    ...providerData
+  }: ICreateProvider): Promise<IProvider> {
+    return await Provider.findOneAndUpdate(
+      { userId },
+      { $set: { ...providerData, userId } },
+      { new: true, upsert: true }
+    )
   }
 
   async listProviders(): Promise<IProvider[]> {
-    return await Provider.find().populate('userId')
+    return await Provider.find().populate({
+      path: 'userId',
+      select: '-password -email',
+    })
   }
 
+  async getProviderByUserId(id: string): Promise<IProvider | null> {
+    return await Provider.findOne({ userId: id }).populate({
+      path: 'userId',
+      select: '-password -email',
+    })
+  }
   async getProviderById(id: string): Promise<IProvider | null> {
-    return await Provider.findById(id).populate('userId')
-  }
-
-  async updateProvider(
-    id: string,
-    providerData: Partial<ICreateProvider>
-  ): Promise<IProvider | null> {
-    if (!isValidObjectId(id)) throw new Error('Invalid ID')
-    return await Provider.findByIdAndUpdate(id, providerData, { new: true })
+    return await Provider.findById(id).populate({
+      path: 'userId',
+      select: '-password -email',
+    })
   }
 
   async deleteProvider(id: string): Promise<void> {
-    if (!isValidObjectId(id)) throw new Error('Invalid ID')
     await Provider.findByIdAndDelete(id)
   }
 }

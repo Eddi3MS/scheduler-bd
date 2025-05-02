@@ -1,10 +1,12 @@
 import { Request, Response } from 'express'
 import serviceService from '../services/ServiceService'
 import { isValidObjectId } from '../utils/validators'
+import Provider from '../models/Provider'
 
 class ServiceController {
   async create(req: Request, res: Response): Promise<Response> {
     const { name, duration, providerId, price } = req.body
+
     if (!name || !duration || !price || !isValidObjectId(providerId)) {
       return res
         .status(400)
@@ -26,6 +28,21 @@ class ServiceController {
 
   async list(req: Request, res: Response): Promise<Response> {
     const services = await serviceService.listServices()
+    return res.json(services)
+  }
+
+  async listOwn(req: Request, res: Response): Promise<Response> {
+    const userId = req.user?.id
+    if (!userId || !isValidObjectId(userId)) {
+      return res.status(400).json({ message: 'Id is required' })
+    }
+
+    const provider = await Provider.findOne({ userId })
+
+    if (!provider) {
+      return res.status(400).json({ message: 'Provider não encontrado' })
+    }
+    const services = await serviceService.listOwnServices(provider._id)
     return res.json(services)
   }
 

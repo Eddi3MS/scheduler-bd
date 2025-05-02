@@ -8,11 +8,17 @@ const router = Router()
 router.post(
   '/',
   authMiddleware,
-  roleMiddleware(['admin']),
+  roleMiddleware(['admin', 'provider']),
   ServiceController.create
 )
 
 router.get('/', authMiddleware, ServiceController.list)
+router.get(
+  '/own',
+  authMiddleware,
+  roleMiddleware(['provider']),
+  ServiceController.listOwn
+)
 router.get('/:id', authMiddleware, ServiceController.getById)
 
 router.get(
@@ -24,14 +30,14 @@ router.get(
 router.put(
   '/:id',
   authMiddleware,
-  roleMiddleware(['admin']),
+  roleMiddleware(['admin', 'provider']),
   ServiceController.update
 )
 
 router.delete(
   '/:id',
   authMiddleware,
-  roleMiddleware(['admin']),
+  roleMiddleware(['admin', 'provider']),
   ServiceController.delete
 )
 

@@ -8,19 +8,15 @@ const router = Router()
 router.post(
   '/',
   authMiddleware,
-  roleMiddleware(['admin']),
-  ProviderController.create
+  roleMiddleware(['provider']),
+  ProviderController.createOrUpdate
 )
 
 router.get('/', authMiddleware, ProviderController.list)
 
+router.get('/user-id/:id', authMiddleware, ProviderController.getByUserId)
+
 router.get('/:id', authMiddleware, ProviderController.getById)
-router.put(
-  '/:id',
-  authMiddleware,
-  roleMiddleware(['admin']),
-  ProviderController.update
-)
 
 router.delete(
   '/:id',

@@ -1,10 +1,8 @@
 import { IAppointment, ICreateAppointment } from '../interfaces/IAppointment'
 import Appointment from '../models/Appointment'
-import Break from '../models/Break'
-import ClosedDates from '../models/ClosedDates'
 import Provider from '../models/Provider'
 import Service from '../models/Service'
-import WeeklyClosedDay from '../models/WeeklyClosedDay'
+
 import {
   addMinutes,
   formatTime,
@@ -31,15 +29,20 @@ class AppointmentService {
       throw new Error('Cannot schedule appointments in the past')
     }
 
+    const provider = await Provider.findById(providerId)
+    if (!provider) {
+      throw new Error('Provider not found')
+    }
+
     // Check weekly closed days (e.g., Sundays)
     const dayOfWeek = getDayOfWeek(date)
-    const weeklyClosed = await WeeklyClosedDay.findOne({ dayOfWeek })
+    const weeklyClosed = provider.weeklyClosedDays.includes(dayOfWeek)
     if (weeklyClosed) {
-      throw new Error('Provider is closed on this day of the week')
+      throw new Error('Provider não trabalha neste dia.')
     }
 
     // Check specific closed days (e.g., holidays)
-    const closedDay = await ClosedDates.findOne({ date })
+    const closedDay = provider.closedDates.includes(date)
     if (closedDay) {
       throw new Error('Provider is closed on this day')
     }
@@ -52,11 +55,6 @@ class AppointmentService {
     const start = appointmentDateTime
     const end = addMinutes(start, service.duration)
 
-    const provider = await Provider.findById(providerId)
-    if (!provider) {
-      throw new Error('Provider not found')
-    }
-
     const workingHours = provider.workingHours
 
     const withinWorkingHours = workingHours.some((period: any) => {
@@ -68,17 +66,6 @@ class AppointmentService {
 
     if (!withinWorkingHours) {
       throw new Error('Appointment time is outside provider working hours')
-    }
-
-    // Check provider breaks
-    const breaks = await Break.find({ providerId, date })
-    const onBreak = breaks.some((b) => {
-      const breakStart = parseDateTime(date, b.start)
-      const breakEnd = parseDateTime(date, b.end)
-      return hasTimeConflict(start, end, breakStart, breakEnd)
-    })
-    if (onBreak) {
-      throw new Error('Time slot conflicts with provider break')
     }
 
     // Check appointment conflicts
@@ -115,10 +102,18 @@ class AppointmentService {
   }
 
   async listOwnAppointments(clientId: string): Promise<IAppointment[]> {
-    return await Appointment.find({
-      clientId,
-      canceled: false,
-    }).populate('serviceId providerId')
+    return await Appointment.find({ clientId, canceled: false })
+      .populate([
+        { path: 'serviceId' },
+        {
+          path: 'providerId',
+          populate: {
+            path: 'userId',
+            select: '-password',
+          },
+        },
+      ])
+      .sort({ date: -1, time: -1 })
   }
 
   async getAvailableTimes(
@@ -127,9 +122,12 @@ class AppointmentService {
     date: string
   ): Promise<string[]> {
     // Verifica se o dia é fechado
+    const provider = await Provider.findById(providerId)
+    if (!provider) throw new Error('provider not found')
+
     const dayOfWeek = getDayOfWeek(date)
-    const isWeeklyClosed = await WeeklyClosedDay.findOne({ dayOfWeek })
-    const isClosedDay = await ClosedDates.findOne({ date })
+    const isWeeklyClosed = provider.weeklyClosedDays.includes(dayOfWeek)
+    const isClosedDay = provider.closedDates.includes(date)
     if (isWeeklyClosed || isClosedDay) return []
 
     const service = await Service.findById(serviceId)
@@ -138,12 +136,9 @@ class AppointmentService {
     const duration = service.duration // in minutes
 
     // Obter os horários de trabalho do barbeiro
-    const provider = await Provider.findById(providerId)
-    if (!provider) throw new Error('provider not found')
 
     const workingHours = provider.workingHours
 
-    const breaks = await Break.find({ providerId, date })
     const appointments = await Appointment.find({ providerId, date }).populate(
       'serviceId'
     )
@@ -167,19 +162,7 @@ class AppointmentService {
           return startTime.isBefore(appEnd) && endTime.isAfter(appStart)
         })
 
-        // Verifica conflitos com breaks
-        const inBreak = breaks.some((b) => {
-          const breakStart = parseDateTime(date, b.start)
-          const breakEnd = parseDateTime(date, b.end)
-
-          return startTime.isBefore(breakEnd) && endTime.isAfter(breakStart)
-        })
-
-        if (
-          (!isToday(date) || startTime.isAfter(getNow())) &&
-          !hasConflict &&
-          !inBreak
-        ) {
+        if ((!isToday(date) || startTime.isAfter(getNow())) && !hasConflict) {
           availableSlots.push(formatTime(startTime))
         }
 

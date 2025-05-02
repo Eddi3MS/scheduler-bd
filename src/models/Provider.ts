@@ -14,6 +14,13 @@ const ProviderSchema: Schema = new Schema({
       end: { type: String, required: true },
     },
   ],
+  weeklyClosedDays: [
+    { type: Number, min: 0, max: 6 }, // 0 = domingo, 6 = sábado
+  ],
+
+  closedDates: [
+    { type: String }, // formato ISO (ex: "2025-05-02")
+  ],
 })
 
 export default mongoose.models.ProviderSchema ||
