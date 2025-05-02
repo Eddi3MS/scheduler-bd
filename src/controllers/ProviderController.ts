@@ -4,9 +4,10 @@ import { isValidObjectId, isValidTime } from '../utils/validators'
 
 class ProviderController {
   async create(req: Request, res: Response): Promise<Response> {
-    const { name, workingHours } = req.body
+    const { userId, workingHours } = req.body
 
-    if (!name) return res.status(400).json({ message: 'Name is required' })
+    if (!userId || !isValidObjectId(userId))
+      return res.status(400).json({ message: 'UserId is required' })
     if (!workingHours || workingHours.length === 0) {
       return res.status(400).json({ message: 'Working hours are required' })
     }
@@ -23,7 +24,7 @@ class ProviderController {
 
     try {
       const provider = await providerService.createProvider({
-        name,
+        userId,
         workingHours,
       })
       return res.status(201).json(provider)
@@ -57,12 +58,10 @@ class ProviderController {
 
   async update(req: Request, res: Response): Promise<Response> {
     const { id } = req.params
-    const { name, workingHours } = req.body
+    const { workingHours } = req.body
 
-    if (!name && !workingHours) {
-      return res
-        .status(400)
-        .json({ message: 'At least name or working hours are required' })
+    if (!workingHours) {
+      return res.status(400).json({ message: 'Parâmetros inválidos' })
     }
 
     // Se horas de trabalho são fornecidas, valida o formato
@@ -73,13 +72,12 @@ class ProviderController {
       )
 
       if (!isValidWorkingHours) {
-        return res.status(400).json({ message: 'Invalid working hours format' })
+        return res.status(400).json({ message: 'Parâmetros inválidos' })
       }
     }
 
     try {
       const updated = await providerService.updateProvider(id, {
-        name,
         workingHours,
       })
       return res.json(updated)

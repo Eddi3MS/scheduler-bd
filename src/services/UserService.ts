@@ -10,7 +10,7 @@ interface LoginResult {
   token: string
 }
 
-class AuthService {
+class UserService {
   async register(data: ICreateUser): Promise<LoginResult> {
     const { name, email, password } = data
 
@@ -93,4 +93,4 @@ class AuthService {
   }
 }
 
-export default new AuthService()
+export default new UserService()

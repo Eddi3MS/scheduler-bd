@@ -9,11 +9,11 @@ class ProviderService {
   }
 
   async listProviders(): Promise<IProvider[]> {
-    return await Provider.find()
+    return await Provider.find().populate('userId')
   }
 
   async getProviderById(id: string): Promise<IProvider | null> {
-    return await Provider.findById(id)
+    return await Provider.findById(id).populate('userId')
   }
 
   async updateProvider(

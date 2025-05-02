@@ -5,7 +5,7 @@ import appointmentRoutes from './appointmentRoutes'
 import closedDatesRoutes from './closedDatesRoutes'
 import weeklyClosedDayRoutes from './weeklyClosedDayRoutes'
 import breakRoutes from './breakRoutes'
-import authRoutes from './authRoutes'
+import userRoutes from './userRoutes'
 
 const router = Router()
 
@@ -15,6 +15,6 @@ router.use('/appointments', appointmentRoutes)
 router.use('/closed-dates', closedDatesRoutes)
 router.use('/weekly-closed-days', weeklyClosedDayRoutes)
 router.use('/breaks', breakRoutes)
-router.use('/auth', authRoutes)
+router.use('/user', userRoutes)
 
 export default router

@@ -1,6 +1,6 @@
 import { Document } from 'mongoose'
 
-export const ROLES = ['admin', 'client'] as const
+export const ROLES = ['admin', 'client', 'provider'] as const
 export type Role = (typeof ROLES)[number]
 
 export interface IUser extends Document {

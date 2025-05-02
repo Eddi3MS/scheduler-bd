@@ -2,7 +2,12 @@ import mongoose, { Schema } from 'mongoose'
 import { IProvider } from '../interfaces/IProvider'
 
 const ProviderSchema: Schema = new Schema({
-  name: { type: String, required: true },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true,
+  },
   workingHours: [
     {
       start: { type: String, required: true },

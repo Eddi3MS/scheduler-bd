@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
-import authService from '../services/authService'
+import UserService from '../services/UserService'
 import { isValidObjectId } from '../utils/validators'
 import { ROLES } from '../interfaces/IUser'
 
-class AuthController {
+class UserController {
   async register(req: Request, res: Response) {
     try {
       const { name, email, password } = req.body
@@ -14,7 +14,7 @@ class AuthController {
         })
       }
 
-      const result = await authService.register({ name, email, password })
+      const result = await UserService.register({ name, email, password })
 
       res.cookie('token', result.token, {
         httpOnly: true,
@@ -38,7 +38,7 @@ class AuthController {
         })
       }
 
-      const result = await authService.login(email, password)
+      const result = await UserService.login(email, password)
 
       res.cookie('token', result.token, {
         httpOnly: true,
@@ -61,7 +61,7 @@ class AuthController {
           message: 'Not Authorized',
         })
       }
-      const user = await authService.getUserById(req.user!.id)
+      const user = await UserService.getUserById(req.user!.id)
       res.json(user)
     } catch (error: any) {
       res.status(404).json({ error: error.message })
@@ -77,7 +77,7 @@ class AuthController {
           message: 'Invalid parameters',
         })
       }
-      const user = await authService.updateUser(req.user!.id, {
+      const user = await UserService.updateUser(req.user!.id, {
         name,
         email,
         password,
@@ -98,7 +98,7 @@ class AuthController {
           message: 'Invalid parameters',
         })
       }
-      const user = await authService.updateUserRole(id, {
+      const user = await UserService.updateUserRole(id, {
         role,
       })
       res.json(user)
@@ -109,7 +109,7 @@ class AuthController {
 
   async delete(req: Request, res: Response) {
     try {
-      await authService.deleteUser(req.user!.id)
+      await UserService.deleteUser(req.user!.id)
       res.status(204).send()
     } catch (error: any) {
       res.status(400).json({ error: error.message })
@@ -118,7 +118,7 @@ class AuthController {
 
   async list(req: Request, res: Response) {
     try {
-      const users = await authService.listUsers()
+      const users = await UserService.listUsers()
       res.json(users)
     } catch (error: any) {
       res.status(500).json({ error: error.message })
@@ -126,4 +126,4 @@ class AuthController {
   }
 }
 
-export default new AuthController()
+export default new UserController()
