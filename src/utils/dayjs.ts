@@ -54,6 +54,10 @@ export function getNow() {
   return dayjs().tz(TIMEZONE)
 }
 
+export function getTodayStr() {
+  return dayjs().format('YYYY-MM-DD')
+}
+
 export const hasTimeConflict = (
   startA: dayjs.Dayjs,
   endA: dayjs.Dayjs,

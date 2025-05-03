@@ -21,6 +21,13 @@ router.get(
   AppointmentController.listFuture
 )
 
+router.get(
+  '/list-by-provider',
+  authMiddleware,
+  roleMiddleware(['provider']),
+  AppointmentController.listProviderAppointments
+)
+
 router.get('/me', authMiddleware, AppointmentController.listOwn)
 
 router.get(
@@ -28,5 +35,7 @@ router.get(
   authMiddleware,
   AppointmentController.getAvailableTime
 )
+
+router.get('/cancel/:id', authMiddleware, AppointmentController.cancel)
 
 export default router

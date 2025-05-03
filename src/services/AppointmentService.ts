@@ -2,12 +2,14 @@ import { IAppointment, ICreateAppointment } from '../interfaces/IAppointment'
 import Appointment from '../models/Appointment'
 import Provider from '../models/Provider'
 import Service from '../models/Service'
+import { notifyProvider } from '../routes/sse'
 
 import {
   addMinutes,
   formatTime,
   getDayOfWeek,
   getNow,
+  getTodayStr,
   hasTimeConflict,
   isToday,
   isValidDateTime,
@@ -72,6 +74,7 @@ class AppointmentService {
     const dayAppointments = await Appointment.find({
       date,
       providerId,
+      canceled: false,
     }).populate('serviceId')
     const conflict = dayAppointments.some((a) => {
       const appStart = parseDateTime(a.date, a.time)
@@ -84,25 +87,78 @@ class AppointmentService {
     }
 
     const newAppointment = new Appointment(appointmentData)
-    return await newAppointment.save()
+
+    const appointment = await newAppointment.save()
+
+    if (isToday(appointment.date)) {
+      const appointmentToProvider = await appointment.populate([
+        'serviceId',
+        'clientId',
+      ])
+
+      notifyProvider(providerId, {
+        status: 'created',
+        data: appointmentToProvider,
+      })
+    }
+
+    return appointment
   }
 
   async listAppointments(): Promise<IAppointment[]> {
-    return await Appointment.find({ canceled: false }).populate(
-      'serviceId providerId clientId'
-    )
+    return await Appointment.find()
+      .populate('serviceId providerId clientId')
+      .populate([
+        { path: 'serviceId' },
+        {
+          path: 'providerId',
+          populate: {
+            path: 'clientId',
+            select: '-password',
+          },
+        },
+      ])
+      .sort({ date: -1, time: -1 })
+  }
+
+  async listProviderAppointments(providerId: string): Promise<IAppointment[]> {
+    const todayStr = getTodayStr()
+    return await Appointment.find({
+      providerId,
+      date: todayStr,
+    })
+      .populate('serviceId clientId')
+      .populate([
+        { path: 'serviceId' },
+        {
+          path: 'clientId',
+
+          select: '-password',
+        },
+      ])
+      .sort({ date: -1, time: -1 })
   }
 
   async listFutureAppointments(): Promise<IAppointment[]> {
-    const today = new Date().toISOString().split('T')[0]
+    const todayStr = getTodayStr()
     return await Appointment.find({
-      date: { $gte: today },
-      canceled: false,
-    }).populate('serviceId providerId clientId')
+      date: { $gte: todayStr },
+    })
+      .populate([
+        { path: 'serviceId' },
+        {
+          path: 'providerId',
+          populate: {
+            path: 'clientId',
+            select: '-password',
+          },
+        },
+      ])
+      .sort({ date: -1, time: -1 })
   }
 
   async listOwnAppointments(clientId: string): Promise<IAppointment[]> {
-    return await Appointment.find({ clientId, canceled: false })
+    return await Appointment.find({ clientId })
       .populate([
         { path: 'serviceId' },
         {
@@ -121,52 +177,84 @@ class AppointmentService {
     providerId: string,
     date: string
   ): Promise<string[]> {
-    // Verifica se o dia é fechado
     const provider = await Provider.findById(providerId)
-    if (!provider) throw new Error('provider not found')
+    if (!provider) throw new Error('Provider not found')
 
     const dayOfWeek = getDayOfWeek(date)
-    const isWeeklyClosed = provider.weeklyClosedDays.includes(dayOfWeek)
-    const isClosedDay = provider.closedDates.includes(date)
-    if (isWeeklyClosed || isClosedDay) return []
+    if (
+      provider.weeklyClosedDays.includes(dayOfWeek) ||
+      provider.closedDates.includes(date)
+    ) {
+      return []
+    }
 
     const service = await Service.findById(serviceId)
     if (!service) throw new Error('Service not found')
 
-    const duration = service.duration // in minutes
+    const duration = service.duration
 
-    // Obter os horários de trabalho do barbeiro
+    const appointments = await Appointment.find({
+      providerId,
+      date,
+      canceled: false,
+    }).populate('serviceId')
 
-    const workingHours = provider.workingHours
+    // Bloqueios: início + duração + buffer
+    const blockedPeriods = appointments
+      .map((a) => {
+        const start = parseDateTime(a.date, a.time) // deve retornar um dayjs
+        const end = start.add((a.serviceId as any).duration, 'minute')
+        return { start, end }
+      })
+      .sort((a, b) => a.start.diff(b.start))
 
-    const appointments = await Appointment.find({ providerId, date }).populate(
-      'serviceId'
-    )
+    const freeIntervals = []
+
+    for (const period of provider.workingHours) {
+      let windowStart = parseDateTime(date, period.start)
+      const windowEnd = parseDateTime(date, period.end)
+
+      for (const blocked of blockedPeriods) {
+        if (blocked.start.isSameOrAfter(windowEnd)) break
+        if (blocked.end.isSameOrBefore(windowStart)) continue
+
+        if (blocked.start.isAfter(windowStart)) {
+          freeIntervals.push({ start: windowStart, end: blocked.start })
+        }
+
+        windowStart = windowStart.isAfter(blocked.end)
+          ? windowStart
+          : blocked.end
+      }
+
+      if (windowStart.isBefore(windowEnd)) {
+        freeIntervals.push({ start: windowStart, end: windowEnd })
+      }
+    }
 
     const availableSlots: string[] = []
 
-    for (const period of workingHours) {
-      let current = parseDateTime(date, period.start)
+    for (const interval of freeIntervals) {
+      let current = interval.start
 
-      const end = parseDateTime(date, period.end)
+      while (current.add(duration, 'minute').isSameOrBefore(interval.end)) {
+        const startTime = current
+        const endTime = current.add(duration, 'minute')
 
-      while (addMinutes(current, duration).isSameOrBefore(end)) {
-        const startTime = current.clone()
-        const endTime = addMinutes(current, duration)
+        if (isToday(date) && startTime.isBefore(getNow())) {
+          current = current.add(duration, 'minute')
+          continue
+        }
 
-        // Verifica conflitos com appointments
-        const hasConflict = appointments.some((a) => {
-          const appStart = parseDateTime(a.date, a.time)
-          const appEnd = addMinutes(appStart, (a.serviceId as any).duration)
+        const hasConflict = blockedPeriods.some(
+          ({ start, end }) => startTime.isBefore(end) && endTime.isAfter(start)
+        )
 
-          return startTime.isBefore(appEnd) && endTime.isAfter(appStart)
-        })
-
-        if ((!isToday(date) || startTime.isAfter(getNow())) && !hasConflict) {
+        if (!hasConflict) {
           availableSlots.push(formatTime(startTime))
         }
 
-        current = addMinutes(current, duration)
+        current = current.add(duration, 'minute')
       }
     }
 
@@ -182,6 +270,18 @@ class AppointmentService {
 
     if (!updated) {
       throw new Error('Appointment not found')
+    }
+
+    const appointmentToProvider = await updated.populate([
+      'serviceId',
+      'clientId',
+    ])
+
+    if (isToday(updated.date)) {
+      notifyProvider(updated.providerId.toString(), {
+        status: 'canceled',
+        data: appointmentToProvider.toObject(),
+      })
     }
   }
 }

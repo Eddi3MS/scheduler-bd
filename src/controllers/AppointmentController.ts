@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import appointmentService from '../services/AppointmentService'
 import { isValidObjectId } from '../utils/validators'
+import Provider from '../models/Provider'
 
 class AppointmentController {
   async create(req: Request, res: Response): Promise<Response> {
@@ -56,6 +57,31 @@ class AppointmentController {
   async list(req: Request, res: Response): Promise<Response> {
     try {
       const appointments = await appointmentService.listAppointments()
+      return res.json(appointments)
+    } catch (error: any) {
+      return res.status(500).json({ message: 'Failed to fetch appointments' })
+    }
+  }
+
+  async listProviderAppointments(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    const userId = req?.user?.id
+
+    if (!userId || !isValidObjectId(userId)) {
+      return res.status(401).json({ message: 'Não autorizado.' })
+    }
+    try {
+      const provider = await Provider.findOne({ userId })
+
+      if (!provider) {
+        return res.status(400).json({ message: 'Provider não encontrado.' })
+      }
+
+      const appointments = await appointmentService.listProviderAppointments(
+        provider._id
+      )
       return res.json(appointments)
     } catch (error: any) {
       return res.status(500).json({ message: 'Failed to fetch appointments' })
