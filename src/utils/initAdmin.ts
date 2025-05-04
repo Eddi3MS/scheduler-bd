@@ -5,7 +5,6 @@ import bcrypt from 'bcryptjs'
 export async function initAdmin() {
   const existingAdmin = await User.findOne({ role: 'admin' })
   if (existingAdmin) {
-    console.log('Admin já existe.')
     return
   }
 

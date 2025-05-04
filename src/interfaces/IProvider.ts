@@ -5,6 +5,8 @@ export interface IProvider extends Document {
   workingHours: { start: string; end: string }[]
   weeklyClosedDays: number[]
   closedDates: string[]
+  image?: string
+  isDeleted: boolean
 }
 
 export interface ICreateProvider {
@@ -12,4 +14,5 @@ export interface ICreateProvider {
   workingHours: { start: string; end: string }[]
   weeklyClosedDays?: number[]
   closedDates?: string[]
+  image?: string
 }

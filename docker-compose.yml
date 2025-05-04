@@ -23,8 +23,9 @@ services:
     depends_on:
       - mongodb
     volumes:
-      - /app/node_modules # Não sobrescreve node_modules no container com o host
-    command: ['node', 'dist/app.js'] # Comando para rodar a aplicação após build
+      - /app/node_modules
+      - ./uploads:/app/uploads
+    command: ['node', 'dist/app.js']
     working_dir: /app
 
 volumes:

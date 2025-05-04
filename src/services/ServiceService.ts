@@ -8,11 +8,11 @@ class ServiceService {
   }
 
   async listServices(): Promise<IService[]> {
-    return await Service.find()
+    return await Service.find({ isDeleted: { $ne: true } })
   }
 
   async listOwnServices(providerId: string): Promise<IService[]> {
-    return await Service.find({ providerId })
+    return await Service.find({ providerId, isDeleted: { $ne: true } })
   }
 
   async getServiceById(id: string): Promise<IService | null> {
@@ -22,6 +22,7 @@ class ServiceService {
   async listServicesByProvider(providerId: string): Promise<IService[]> {
     return await Service.find({
       providerId,
+      isDeleted: { $ne: true },
     })
   }
 
@@ -33,7 +34,9 @@ class ServiceService {
   }
 
   async deleteService(id: string): Promise<void> {
-    await Service.findByIdAndDelete(id)
+    await Service.findByIdAndUpdate(id, {
+      isDeleted: true,
+    })
   }
 }
 

@@ -7,6 +7,8 @@ RUN npm install
 
 COPY . .
 
+RUN mkdir -p /app/uploads
+
 RUN npm install -g typescript
 RUN tsc
 

@@ -6,6 +6,7 @@ class ProviderController {
   async createOrUpdate(req: Request, res: Response): Promise<Response> {
     const { workingHours, weeklyClosedDays, closedDates } = req.body
     const userId = req.user?.id
+    const image = req.file ? `/uploads/${req.file.filename}` : ''
 
     if (!userId || !isValidObjectId(userId))
       return res.status(400).json({ message: 'UserId é obrigatório' })
@@ -29,6 +30,7 @@ class ProviderController {
         workingHours,
         closedDates,
         weeklyClosedDays,
+        image,
       })
       return res.status(201).json(provider)
     } catch (error) {

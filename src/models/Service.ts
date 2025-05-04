@@ -6,6 +6,8 @@ const ServiceSchema: Schema = new Schema({
   duration: { type: Number, required: true },
   providerId: { type: Schema.Types.ObjectId, ref: 'Provider', required: true },
   price: { type: Number, required: true },
+  image: { type: String },
+  isDeleted: { type: Boolean, default: false },
 })
 
 export default mongoose.models.ServiceSchema ||

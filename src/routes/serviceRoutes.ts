@@ -2,6 +2,7 @@ import { Router } from 'express'
 import ServiceController from '../controllers/ServiceController'
 import { authMiddleware } from '../middlewares/authMiddleware'
 import { roleMiddleware } from '../middlewares/roleMiddleware'
+import upload from '../utils/multer'
 
 const router = Router()
 
@@ -9,6 +10,7 @@ router.post(
   '/',
   authMiddleware,
   roleMiddleware(['admin', 'provider']),
+  upload.single('image'),
   ServiceController.create
 )
 
@@ -31,6 +33,7 @@ router.put(
   '/:id',
   authMiddleware,
   roleMiddleware(['admin', 'provider']),
+  upload.single('image'),
   ServiceController.update
 )
 

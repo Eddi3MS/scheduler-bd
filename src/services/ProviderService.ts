@@ -14,7 +14,7 @@ class ProviderService {
   }
 
   async listProviders(): Promise<IProvider[]> {
-    return await Provider.find().populate({
+    return await Provider.find({ isDeleted: { $ne: true } }).populate({
       path: 'userId',
       select: '-password -email',
     })
@@ -34,7 +34,7 @@ class ProviderService {
   }
 
   async deleteProvider(id: string): Promise<void> {
-    await Provider.findByIdAndDelete(id)
+    await Provider.findByIdAndUpdate(id, { isDeleted: { $ne: true } })
   }
 }
 

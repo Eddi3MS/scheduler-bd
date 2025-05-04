@@ -21,6 +21,8 @@ const ProviderSchema: Schema = new Schema({
   closedDates: [
     { type: String }, // formato ISO (ex: "2025-05-02")
   ],
+  image: { type: String },
+  isDeleted: { type: Boolean, default: false },
 })
 
 export default mongoose.models.ProviderSchema ||

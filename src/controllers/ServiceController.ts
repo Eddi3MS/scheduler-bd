@@ -6,6 +6,7 @@ import Provider from '../models/Provider'
 class ServiceController {
   async create(req: Request, res: Response): Promise<Response> {
     const { name, duration, providerId, price } = req.body
+    const image = req.file ? `/uploads/${req.file.filename}` : ''
 
     if (!name || !duration || !price || !isValidObjectId(providerId)) {
       return res
@@ -19,6 +20,7 @@ class ServiceController {
         duration,
         providerId,
         price,
+        image,
       })
       return res.status(201).json(service)
     } catch (error) {
@@ -68,6 +70,7 @@ class ServiceController {
   async update(req: Request, res: Response): Promise<Response> {
     const { id } = req.params
     const { name, duration, price } = req.body
+    const image = req.file ? `/uploads/${req.file.filename}` : ''
 
     if (!isValidObjectId(id)) {
       return res.status(400).json({ message: 'Invalid Parameters' })
@@ -84,6 +87,7 @@ class ServiceController {
         name,
         duration,
         price,
+        image,
       })
       return res.json(updated)
     } catch (error) {

@@ -7,6 +7,7 @@ import connectDB from './config/db'
 import routes from './routes'
 import { errorMiddleware } from './middlewares/errorMiddleware'
 import cookieParser from 'cookie-parser'
+import path from 'path'
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -22,12 +23,12 @@ app.use(
   })
 )
 
-app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 
 // API Routes
 app.use('/api', routes)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 // Health Check Endpoint
 app.get('/api/health', (req, res) => {

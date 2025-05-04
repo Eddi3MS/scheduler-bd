@@ -5,6 +5,8 @@ export interface IService extends Document {
   duration: number
   providerId: string
   price: number
+  image?: String
+  isDeleted: boolean
 }
 
 export interface ICreateService {
@@ -12,4 +14,5 @@ export interface ICreateService {
   duration: number
   providerId: string
   price: number
+  image?: string
 }
