@@ -4,7 +4,17 @@ import { isValidObjectId, isValidTime } from '../utils/validators'
 
 class ProviderController {
   async createOrUpdate(req: Request, res: Response): Promise<Response> {
-    const { workingHours, weeklyClosedDays, closedDates } = req.body
+    const workingHours = req.body.workingHours
+      ? JSON.parse(req.body.workingHours)
+      : []
+
+    const weeklyClosedDays = req.body.weeklyClosedDays
+      ? JSON.parse(req.body.weeklyClosedDays)
+      : []
+    const closedDates = req.body.closedDates
+      ? JSON.parse(req.body.closedDates)
+      : []
+
     const userId = req.user?.id
     const image = req.file ? `/uploads/${req.file.filename}` : ''
 
@@ -30,7 +40,7 @@ class ProviderController {
         workingHours,
         closedDates,
         weeklyClosedDays,
-        image,
+        ...(image && { image }),
       })
       return res.status(201).json(provider)
     } catch (error) {

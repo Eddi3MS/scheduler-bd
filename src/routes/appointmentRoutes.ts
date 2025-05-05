@@ -27,6 +27,12 @@ router.get(
   roleMiddleware(['provider']),
   AppointmentController.listProviderAppointments
 )
+router.get(
+  '/list-future-by-provider',
+  authMiddleware,
+  roleMiddleware(['provider']),
+  AppointmentController.listProviderFutureAppointments
+)
 
 router.get('/me', authMiddleware, AppointmentController.listOwn)
 

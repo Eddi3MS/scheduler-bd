@@ -20,7 +20,7 @@ class ServiceController {
         duration,
         providerId,
         price,
-        image,
+        ...(image && { image }),
       })
       return res.status(201).json(service)
     } catch (error) {
@@ -87,7 +87,7 @@ class ServiceController {
         name,
         duration,
         price,
-        image,
+        ...(image && { image }),
       })
       return res.json(updated)
     } catch (error) {

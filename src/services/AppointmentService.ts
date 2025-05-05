@@ -127,16 +127,30 @@ class AppointmentService {
       providerId,
       date: todayStr,
     })
-      .populate('serviceId clientId')
       .populate([
         { path: 'serviceId' },
         {
           path: 'clientId',
-
           select: '-password',
         },
       ])
       .sort({ date: -1, time: -1 })
+  }
+
+  async listProviderFutureAppointments(providerId: string): Promise<any[]> {
+    const todayStr = getTodayStr()
+
+    const res = await Appointment.find({ providerId, date: { $gt: todayStr } })
+      .populate([
+        { path: 'serviceId' },
+        {
+          path: 'clientId',
+          select: '-password',
+        },
+      ])
+      .sort({ date: 1, time: 1 })
+
+    return res
   }
 
   async listFutureAppointments(): Promise<IAppointment[]> {
