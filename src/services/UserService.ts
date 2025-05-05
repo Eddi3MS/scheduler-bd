@@ -3,7 +3,8 @@ import User from '../models/User'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'chave_super_secreta'
+const JWT_SECRET = process.env.JWT_SECRET!
+console.log('🚀 ~ JWT_SECRET:', JWT_SECRET)
 
 interface LoginResult {
   user: Omit<IUser, 'password'>
