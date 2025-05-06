@@ -21,7 +21,9 @@ class UserController {
       res.cookie('token', result.token, {
         httpOnly: true,
         secure: true,
-        sameSite: 'lax',
+        sameSite: 'none',
+        domain: '.edsonmarcelo.com.br',
+        path: '/',
         expires: expiresInSevenDay,
       })
 
@@ -45,9 +47,11 @@ class UserController {
       const expiresInSevenDay = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       res.cookie('token', result.token, {
-        httpOnly: true,
         secure: true,
-        sameSite: 'lax',
+        httpOnly: true,
+        sameSite: 'none',
+        domain: '.edsonmarcelo.com.br',
+        path: '/',
         expires: expiresInSevenDay,
       })
 
