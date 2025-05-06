@@ -4,7 +4,6 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET!
-console.log('🚀 ~ JWT_SECRET:', JWT_SECRET)
 
 interface LoginResult {
   user: Omit<IUser, 'password'>
