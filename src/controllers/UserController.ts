@@ -16,11 +16,13 @@ class UserController {
 
       const result = await UserService.register({ name, email, password })
 
+      const expiresInSevenDay = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
       res.cookie('token', result.token, {
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60, // Cookie expiration time (7 days)
+        expires: expiresInSevenDay,
       })
 
       res.status(201).json(result.user)
@@ -40,11 +42,13 @@ class UserController {
 
       const result = await UserService.login(email, password)
 
+      const expiresInSevenDay = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
       res.cookie('token', result.token, {
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60, // Cookie expiration time (7 days)
+        expires: expiresInSevenDay,
       })
 
       res.json(result.user)
