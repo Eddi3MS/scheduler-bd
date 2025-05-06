@@ -20,7 +20,7 @@ class UserController {
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time (7 days)
+        maxAge: 7 * 24 * 60 * 60, // Cookie expiration time (7 days)
       })
 
       res.status(201).json(result.user)
@@ -44,7 +44,7 @@ class UserController {
         httpOnly: true,
         secure: true,
         sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000, // Cookie expiration time (7 days)
+        maxAge: 7 * 24 * 60 * 60, // Cookie expiration time (7 days)
       })
 
       res.json(result.user)
