@@ -86,7 +86,7 @@ class UserService {
 
   private generateToken(user: IUser): string {
     return jwt.sign(
-      { id: user._id, email: user.email, role: user.role, name: user.name },
+      { _id: user._id, email: user.email, role: user.role, name: user.name },
       JWT_SECRET,
       { expiresIn: '7d' }
     )
