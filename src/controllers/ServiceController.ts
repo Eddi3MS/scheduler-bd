@@ -34,7 +34,7 @@ class ServiceController {
   }
 
   async listOwn(req: Request, res: Response): Promise<Response> {
-    const userId = req.user?.id
+    const userId = req.user?._id
     if (!userId || !isValidObjectId(userId)) {
       return res.status(400).json({ message: 'Id is required' })
     }
