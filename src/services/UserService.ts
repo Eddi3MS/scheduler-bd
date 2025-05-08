@@ -22,9 +22,9 @@ class UserService {
     await user.save()
 
     const token = this.generateToken(user)
-    const { password: _, _id, ...userData } = user.toObject()
+    const { password: _, ...userData } = user.toObject()
 
-    return { user: { ...userData, id: _id } as any, token }
+    return { user: userData as any, token }
   }
 
   async login(email: string, password: string): Promise<LoginResult> {
@@ -36,9 +36,9 @@ class UserService {
 
     const token = this.generateToken(user)
 
-    const { password: _, _id, ...userData } = user.toObject()
+    const { password: _, ...userData } = user.toObject()
 
-    return { user: { ...userData, id: _id } as any, token }
+    return { user: userData as any, token }
   }
 
   async getUserById(id: string): Promise<Omit<IUser, 'password'>> {
