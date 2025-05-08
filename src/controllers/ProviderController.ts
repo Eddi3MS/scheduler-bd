@@ -15,7 +15,7 @@ class ProviderController {
       ? JSON.parse(req.body.closedDates)
       : []
 
-    const userId = req.user?.id
+    const userId = req.user?._id
     const image = req.file ? `/uploads/${req.file.filename}` : ''
 
     if (!userId || !isValidObjectId(userId))

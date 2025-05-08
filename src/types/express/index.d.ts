@@ -5,7 +5,7 @@ import { Role } from '../../interfaces/IUser'
 declare module 'express' {
   interface Request {
     user?: {
-      id: string
+      _id: string
       email: string
       role: Role
     }

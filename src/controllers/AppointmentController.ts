@@ -8,7 +8,7 @@ class AppointmentController {
     try {
       const { date, time, serviceId, providerId } = req.body
 
-      const clientId = req.user?.id
+      const clientId = req.user?._id
 
       if (!clientId || !date || !time || !serviceId || !providerId) {
         return res.status(400).json({
@@ -43,7 +43,7 @@ class AppointmentController {
 
   async listOwn(req: Request, res: Response) {
     try {
-      const userId = req.user?.id
+      const userId = req.user?._id
       if (!userId || !isValidObjectId(userId)) {
         return res.status(400).json({ message: 'Invalid userId' })
       }
@@ -67,7 +67,7 @@ class AppointmentController {
     req: Request,
     res: Response
   ): Promise<Response> {
-    const userId = req?.user?.id
+    const userId = req.user?._id
 
     if (!userId || !isValidObjectId(userId)) {
       return res.status(401).json({ message: 'Não autorizado.' })
@@ -92,7 +92,7 @@ class AppointmentController {
     req: Request,
     res: Response
   ): Promise<Response> {
-    const userId = req?.user?.id
+    const userId = req.user?._id
 
     if (!userId || !isValidObjectId(userId)) {
       return res.status(401).json({ message: 'Não autorizado.' })

@@ -63,13 +63,13 @@ class UserController {
 
   async me(req: Request, res: Response) {
     try {
-      const id = req.user?.id
+      const id = req.user?._id
       if (!id) {
         return res.status(400).json({
           message: 'Not Authorized',
         })
       }
-      const user = await UserService.getUserById(req.user!.id)
+      const user = await UserService.getUserById(id)
       res.json(user)
     } catch (error: any) {
       res.status(404).json({ error: error.message })
@@ -85,7 +85,14 @@ class UserController {
           message: 'Invalid parameters',
         })
       }
-      const user = await UserService.updateUser(req.user!.id, {
+
+      const id = req.user?._id
+      if (!id) {
+        return res.status(400).json({
+          message: 'Not Authorized',
+        })
+      }
+      const user = await UserService.updateUser(id, {
         name,
         email,
         password,
@@ -117,7 +124,14 @@ class UserController {
 
   async delete(req: Request, res: Response) {
     try {
-      await UserService.deleteUser(req.user!.id)
+      const id = req.user?._id
+      if (!id) {
+        return res.status(400).json({
+          message: 'Not Authorized',
+        })
+      }
+
+      await UserService.deleteUser(id)
       res.status(204).send()
     } catch (error: any) {
       res.status(400).json({ error: error.message })
