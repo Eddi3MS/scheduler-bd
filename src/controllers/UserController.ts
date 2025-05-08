@@ -22,7 +22,7 @@ class UserController {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-        domain: '.edsonmarcelo.com.br',
+        domain: process.env.COOKIE_DOMAIN,
         path: '/',
         expires: expiresInSevenDay,
       })
@@ -50,7 +50,7 @@ class UserController {
         secure: true,
         httpOnly: true,
         sameSite: 'none',
-        domain: '.edsonmarcelo.com.br',
+        domain: process.env.COOKIE_DOMAIN,
         path: '/',
         expires: expiresInSevenDay,
       })
