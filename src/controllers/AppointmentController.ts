@@ -72,6 +72,7 @@ class AppointmentController {
     if (!userId || !isValidObjectId(userId)) {
       return res.status(401).json({ message: 'Não autorizado.' })
     }
+
     try {
       const provider = await Provider.findOne({ userId })
 
@@ -79,47 +80,24 @@ class AppointmentController {
         return res.status(400).json({ message: 'Provider não encontrado.' })
       }
 
-      const appointments = await appointmentService.listProviderAppointments(
-        provider._id
-      )
-      return res.json(appointments)
-    } catch (error: any) {
-      return res.status(500).json({ message: 'Failed to fetch appointments' })
-    }
-  }
+      const { date, clientId } = req.query
 
-  async listProviderFutureAppointments(
-    req: Request,
-    res: Response
-  ): Promise<Response> {
-    const userId = req.user?._id
-
-    if (!userId || !isValidObjectId(userId)) {
-      return res.status(401).json({ message: 'Não autorizado.' })
-    }
-    try {
-      const provider = await Provider.findOne({ userId })
-
-      if (!provider) {
-        return res.status(400).json({ message: 'Provider não encontrado.' })
+      if (
+        clientId &&
+        (typeof clientId !== 'string' || !isValidObjectId(clientId))
+      ) {
+        return res.status(400).json({ message: 'ClientId inválido' })
       }
 
-      const appointments =
-        await appointmentService.listProviderFutureAppointments(provider._id)
-      return res.json(appointments)
-    } catch (error: any) {
-      return res.status(500).json({ message: 'Failed to fetch appointments' })
-    }
-  }
+      const appointments = await appointmentService.listProviderAppointments({
+        providerId: provider._id.toString(),
+        date: typeof date === 'string' ? date : undefined,
+        clientId: typeof clientId === 'string' ? clientId : undefined,
+      })
 
-  async listFuture(req: Request, res: Response): Promise<Response> {
-    try {
-      const appointments = await appointmentService.listFutureAppointments()
       return res.json(appointments)
     } catch (error: any) {
-      return res
-        .status(500)
-        .json({ message: 'Failed to fetch future appointments' })
+      return res.status(500).json({ message: 'Erro ao buscar agendamentos.' })
     }
   }
 

@@ -15,6 +15,7 @@ import {
   isValidDateTime,
   parseDateTime,
 } from '../utils/dayjs'
+import { isValidObjectId } from '../utils/validators'
 
 class AppointmentService {
   async createAppointment(
@@ -121,26 +122,32 @@ class AppointmentService {
       .sort({ date: -1, time: -1 })
   }
 
-  async listProviderAppointments(providerId: string): Promise<IAppointment[]> {
+  async listProviderAppointments({
+    providerId,
+    date,
+    clientId,
+  }: {
+    providerId: string
+    date?: string
+    clientId?: string
+  }): Promise<IAppointment[]> {
     const todayStr = getTodayStr()
-    return await Appointment.find({
+
+    const query: any = {
       providerId,
-      date: todayStr,
-    })
-      .populate([
-        { path: 'serviceId' },
-        {
-          path: 'clientId',
-          select: '-password',
-        },
-      ])
-      .sort({ date: -1, time: -1 })
-  }
+    }
 
-  async listProviderFutureAppointments(providerId: string): Promise<any[]> {
-    const todayStr = getTodayStr()
+    if (date) {
+      query.date = date
+    } else {
+      query.date = todayStr
+    }
 
-    const res = await Appointment.find({ providerId, date: { $gt: todayStr } })
+    if (clientId && isValidObjectId(clientId)) {
+      query.clientId = clientId
+    }
+
+    return await Appointment.find(query)
       .populate([
         { path: 'serviceId' },
         {
@@ -149,26 +156,6 @@ class AppointmentService {
         },
       ])
       .sort({ date: 1, time: 1 })
-
-    return res
-  }
-
-  async listFutureAppointments(): Promise<IAppointment[]> {
-    const todayStr = getTodayStr()
-    return await Appointment.find({
-      date: { $gte: todayStr },
-    })
-      .populate([
-        { path: 'serviceId' },
-        {
-          path: 'providerId',
-          populate: {
-            path: 'clientId',
-            select: '-password',
-          },
-        },
-      ])
-      .sort({ date: -1, time: -1 })
   }
 
   async listOwnAppointments(clientId: string): Promise<IAppointment[]> {

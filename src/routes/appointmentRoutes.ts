@@ -10,15 +10,8 @@ router.post('/', authMiddleware, AppointmentController.create)
 router.get(
   '/',
   authMiddleware,
-  roleMiddleware(['admin', 'provider']),
+  roleMiddleware(['admin']),
   AppointmentController.list
-)
-
-router.get(
-  '/future',
-  authMiddleware,
-  roleMiddleware(['admin', 'provider']),
-  AppointmentController.listFuture
 )
 
 router.get(
@@ -26,12 +19,6 @@ router.get(
   authMiddleware,
   roleMiddleware(['provider']),
   AppointmentController.listProviderAppointments
-)
-router.get(
-  '/list-future-by-provider',
-  authMiddleware,
-  roleMiddleware(['provider']),
-  AppointmentController.listProviderFutureAppointments
 )
 
 router.get('/me', authMiddleware, AppointmentController.listOwn)
