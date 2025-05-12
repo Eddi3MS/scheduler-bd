@@ -3,8 +3,7 @@ services:
     image: mongo:6
     container_name: scheduler_db
     restart: unless-stopped
-    ports:
-      - '27017'
+
     volumes:
       - scheduler_db_data:/data/db
     environment:
