@@ -21,6 +21,13 @@ router.get(
   AppointmentController.listProviderAppointments
 )
 
+router.post(
+  '/create-by-provider',
+  authMiddleware,
+  roleMiddleware(['provider']),
+  AppointmentController.createByProvider
+)
+
 router.get('/me', authMiddleware, AppointmentController.listOwn)
 
 router.get(

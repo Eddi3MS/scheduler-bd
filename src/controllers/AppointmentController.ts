@@ -2,6 +2,8 @@ import { Request, Response } from 'express'
 import appointmentService from '../services/AppointmentService'
 import { isValidObjectId } from '../utils/validators'
 import Provider from '../models/Provider'
+import User from '../models/User'
+import UserService from '../services/UserService'
 
 class AppointmentController {
   async create(req: Request, res: Response): Promise<Response> {
@@ -25,6 +27,59 @@ class AppointmentController {
         return res
           .status(400)
           .json({ message: 'Invalid serviceId or providerId' })
+      }
+
+      const appointment = await appointmentService.createAppointment({
+        date,
+        time,
+        serviceId,
+        providerId,
+        clientId,
+      })
+
+      return res.status(201).json(appointment)
+    } catch (error: any) {
+      return res.status(400).json({ message: error.message })
+    }
+  }
+
+  async createByProvider(req: Request, res: Response): Promise<Response> {
+    try {
+      const { date, time, serviceId, providerId, clientName, clientEmail } =
+        req.body
+
+      if (
+        !clientName ||
+        !clientEmail ||
+        !date ||
+        !time ||
+        !serviceId ||
+        !providerId
+      ) {
+        return res.status(400).json({
+          message:
+            'All fields are required: clientName, clientEmail, date, time, serviceId, providerId',
+        })
+      }
+
+      if (!isValidObjectId(serviceId) || !isValidObjectId(providerId)) {
+        return res
+          .status(400)
+          .json({ message: 'Invalid serviceId or providerId' })
+      }
+
+      const client = await User.findOne({ email: clientEmail })
+
+      let clientId = client?._id
+
+      if (!clientId) {
+        const newClient = await UserService.register({
+          email: clientEmail,
+          name: clientName,
+          password: 'senha123',
+        })
+
+        clientId = newClient.user._id
       }
 
       const appointment = await appointmentService.createAppointment({
